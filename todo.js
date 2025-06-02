@@ -1,7 +1,10 @@
-const todoBtn = document.getElementById("newTask");
 const form = document.querySelector("form");
-todoBtn.addEventListener("click", todo);
 let taskArr = [], id = 0;
+let taskArray;
+
+document.addEventListener('DOMContentLoaded', () => {
+    renderTasks();
+})
 
 function todo() {
     let entry = `
@@ -17,8 +20,6 @@ function todo() {
         <textarea name="textArea" id="text-area" rows="5"></textarea>
         <button id="addTask" type="button" onclick="displayBtn()">Add task</button>`
     form.innerHTML += entry;
-    todoBtn.remove();
-
     const newdelete = document.getElementById("newDelete")
     newdelete.remove();
 }
@@ -36,8 +37,8 @@ addValue = () => {
         discription: `${textdis.value}`
     };
     taskArr.push(task);
+    localStorage.setItem(`task_array`, JSON.stringify(taskArr));
     id = id + 1;
-    console.log(taskArr)
 }
 
 function displayBtn() {
@@ -46,13 +47,14 @@ function displayBtn() {
     document.getElementById("txtBox").value = "";
     document.getElementById("dateBox").value = "";
     document.getElementById("text-area").value = "";
-
     form.innerHTML = "";
 }
 
 function renderTasks() {
     displayTask.innerHTML = `<button id="newDelete" onclick="todo()">Add new task</button>`;
-    taskArr.forEach(element => {
+    taskArray = JSON.parse(localStorage.getItem(`task_array`));
+    console.log(taskArray)
+    taskArray.forEach(element => {
         let display = `<div>
             <p>Title: ${element.title}</p>
             <p>Date: ${element.date}</p>
@@ -65,13 +67,20 @@ function renderTasks() {
 }
 
 function deleteBtn(elmid) {
-    taskArr = taskArr.filter((taskA) => Number(taskA.id) !== Number(elmid));
+    taskArray = JSON.parse(localStorage.getItem(`task_array`)) || [];
+    taskArray = taskArray.filter((taskA) => Number(taskA.id) !== Number(elmid));
+    console.log(taskArray);
+    localStorage.setItem("task_array", JSON.stringify(taskArray));
     displayTask.innerHTML = "";
     renderTasks();
 }
 
+//when we edit the data the data should get updated in the local storage 
 function editBtn(elmid) {
-    const taskToEdit = taskArr.find(taskA => Number(taskA.id) === Number(elmid));
+    //const taskToEdit = taskArr.find(taskA => Number(taskA.id) === Number(elmid));
+    taskArray = JSON.parse(localStorage.getItem('task_array'));
+    taskToEdit = taskArray.find(taskA => Number(taskA.id) === Number(elmid));
+
     if (taskToEdit) {
         editingTaskId = elmid;
         form.innerHTML = `
@@ -94,6 +103,7 @@ function updateTask() {
         taskArr[taskIndex].title = txtBox.value;
         taskArr[taskIndex].date = dateBox.value;
         taskArr[taskIndex].discription = textdis.value;
+        localStorage.setItem('task_array', JSON.stringify(taskArr));
         editingTaskId = null;
         form.innerHTML = "";
     }
